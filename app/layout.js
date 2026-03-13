@@ -1,4 +1,5 @@
 import "./globals.css";
+import MobileBottomNav from "../components/MobileBottomNav";
 
 export const metadata = {
   title: "SLFlipForge",
@@ -8,7 +9,6 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <head />
       <body className="site-shell">
         <header className="site-header">
           <div className="site-header-inner">
@@ -25,12 +25,7 @@ export default function RootLayout({ children }) {
 
         <main className="page-wrap">{children}</main>
 
-        <footer className="mobile-tabbar">
-          <a href="/dashboard">Dashboard</a>
-          <a href="/flip-scanner">Scan</a>
-          <a href="/inventory-manager">Inventory</a>
-          <a href="/flipbot-alerts">Alerts</a>
-        </footer>
+        <MobileBottomNav />
       </body>
     </html>
   );

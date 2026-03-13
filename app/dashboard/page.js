@@ -55,122 +55,95 @@ export default function DashboardPage() {
 
   const bestFlip = useMemo(() => {
     if (!opportunities.length) return null
-
-    const ranked = [...opportunities].sort((a, b) => {
-      const aProfit = Number(a.estimated_profit || 0)
-      const bProfit = Number(b.estimated_profit || 0)
-      return bProfit - aProfit
-    })
-
-    return ranked[0]
+    return [...opportunities].sort(
+      (a, b) => Number(b.estimated_profit || 0) - Number(a.estimated_profit || 0)
+    )[0]
   }, [opportunities])
-
-  const recentAlerts = alerts.slice(0, 3)
 
   return (
     <main className="page">
       <div className="container dashboard-shell">
         <section className="hero-panel">
-          <div className="hero-copy">
-            <p className="eyebrow">Reseller Intelligence</p>
-            <h1>Find profitable flips faster.</h1>
-            <p className="hero-text">
-              Scan products, estimate resale value, track inventory, and surface
-              the best opportunities from one dashboard.
-            </p>
-          </div>
+          <p className="eyebrow">Reseller Intelligence</p>
+          <h1>Find profitable flips faster.</h1>
+          <p className="hero-text">
+            Scan products, estimate resale value, track inventory, and surface the best
+            opportunities from one dashboard.
+          </p>
 
           <div className="hero-actions">
-            <Link className="btn dashboard-cta" href="/flip-scanner">
-              Scan Product
-            </Link>
-            <Link className="btn btn-secondary dashboard-cta" href="/market-scan">
-              Run Market Scan
-            </Link>
-            <Link className="btn btn-secondary dashboard-cta" href="/ai-listing-generator">
-              AI Listing
-            </Link>
+            <Link className="btn" href="/flip-scanner">Scan Product</Link>
+            <Link className="btn btn-secondary" href="/market-scan">Run Market Scan</Link>
+            <Link className="btn btn-secondary" href="/listing-builder">AI Listing</Link>
           </div>
         </section>
 
         <section className="dashboard-grid dashboard-grid-4">
-          <div className="metric-card">
-            <p className="metric-label">Items in Inventory</p>
-            <h2>{stats.totalInventory}</h2>
+          <div className="stat-card">
+            <p>Items in Inventory</p>
+            <div className="stat-number">{stats.totalInventory}</div>
           </div>
 
-          <div className="metric-card">
-            <p className="metric-label">Potential Profit</p>
-            <h2>${stats.potentialProfit.toFixed(2)}</h2>
+          <div className="stat-card">
+            <p>Potential Profit</p>
+            <div className="stat-number">${stats.potentialProfit.toFixed(2)}</div>
           </div>
 
-          <div className="metric-card">
-            <p className="metric-label">Hot Opportunities</p>
-            <h2>{stats.hotOpportunities}</h2>
+          <div className="stat-card">
+            <p>Hot Opportunities</p>
+            <div className="stat-number">{stats.hotOpportunities}</div>
           </div>
 
-          <div className="metric-card">
-            <p className="metric-label">Active Alerts</p>
-            <h2>{stats.activeAlerts}</h2>
+          <div className="stat-card">
+            <p>Active Alerts</p>
+            <div className="stat-number">{stats.activeAlerts}</div>
           </div>
         </section>
 
         <section className="dashboard-grid dashboard-main-grid">
-          <div className="card spotlight-card">
+          <div className="section-card">
             <div className="section-head">
               <span className="badge badge-hot">Best Flip Today</span>
             </div>
 
             {bestFlip ? (
               <>
-                <h3 className="spotlight-title">{bestFlip.title || 'Untitled Opportunity'}</h3>
+                <h2 className="spotlight-title">{bestFlip.title || 'Untitled Opportunity'}</h2>
                 <p className="muted">
                   {bestFlip.source || 'Unknown source'} · {bestFlip.location || 'No location'}
                 </p>
 
                 <div className="spotlight-stats">
-                  <div>
+                  <div className="spotlight-stat">
                     <span>Buy</span>
                     <strong>${Number(bestFlip.asking_price || 0).toFixed(2)}</strong>
                   </div>
-                  <div>
+                  <div className="spotlight-stat">
                     <span>Sell</span>
                     <strong>${Number(bestFlip.estimated_sale_price || 0).toFixed(2)}</strong>
                   </div>
-                  <div>
+                  <div className="spotlight-stat">
                     <span>Profit</span>
                     <strong>${Number(bestFlip.estimated_profit || 0).toFixed(2)}</strong>
                   </div>
-                  <div>
+                  <div className="spotlight-stat">
                     <span>ROI</span>
                     <strong>{Number(bestFlip.roi || 0).toFixed(1)}%</strong>
                   </div>
                 </div>
 
-                <div className="spotlight-actions">
-                  <Link className="btn" href="/opportunities">
-                    View Opportunities
-                  </Link>
-                  <Link className="btn btn-secondary" href="/inventory-manager">
-                    Inventory
-                  </Link>
+                <div className="hero-actions">
+                  <Link className="btn btn-secondary" href="/opportunities">View Opportunities</Link>
+                  <Link className="btn btn-secondary" href="/inventory-manager">Inventory</Link>
                 </div>
               </>
             ) : (
-              <div className="empty-state">
-                <p>No opportunities loaded yet.</p>
-                <Link className="btn" href="/market-scan">
-                  Start Scanning
-                </Link>
-              </div>
+              <p className="muted">No opportunities loaded yet.</p>
             )}
           </div>
 
-          <div className="card quick-actions-card">
-            <div className="section-head">
-              <h3>Quick Actions</h3>
-            </div>
-
+          <div className="section-card">
+            <h3>Quick Actions</h3>
             <div className="quick-actions-grid">
               <Link className="quick-action-btn" href="/barcode-lab">
                 <span className="quick-action-title">Barcode Lab</span>
@@ -196,32 +169,23 @@ export default function DashboardPage() {
         </section>
 
         <section className="dashboard-grid dashboard-main-grid">
-          <div className="card">
+          <div className="section-card">
             <div className="section-head">
               <h3>Recent Alerts</h3>
-              <Link className="text-link" href="/flipbot-alerts">
-                View all
-              </Link>
+              <Link className="text-link" href="/flipbot-alerts">View all</Link>
             </div>
 
-            {recentAlerts.length === 0 ? (
+            {alerts.length === 0 ? (
               <p className="muted">No recent alerts yet.</p>
             ) : (
               <div className="stack-list">
-                {recentAlerts.map((alert) => (
+                {alerts.slice(0, 3).map((alert) => (
                   <div className="stack-item" key={alert.id}>
                     <div>
                       <strong>{alert.title || 'Untitled Alert'}</strong>
-                      <p className="muted">
-                        Buy ${Number(alert.buy_price || 0).toFixed(2)} ·
-                        Resale ${Number(alert.resale_price || 0).toFixed(2)}
-                      </p>
                     </div>
                     <div className="stack-side">
-                      <strong className="profit-text">
-                        ${Number(alert.profit || 0).toFixed(2)}
-                      </strong>
-                      <span className="muted">{Number(alert.roi || 0).toFixed(0)}% ROI</span>
+                      <strong>${Number(alert.profit || 0).toFixed(2)}</strong>
                     </div>
                   </div>
                 ))}
@@ -229,19 +193,17 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="card">
+          <div className="section-card">
             <div className="section-head">
               <h3>Inventory Snapshot</h3>
-              <Link className="text-link" href="/inventory-manager">
-                Open inventory
-              </Link>
+              <Link className="text-link" href="/inventory-manager">Open inventory</Link>
             </div>
 
             {items.length === 0 ? (
               <p className="muted">No inventory items yet.</p>
             ) : (
               <div className="stack-list">
-                {items.slice(0, 4).map((item) => {
+                {items.slice(0, 3).map((item) => {
                   const buy = Number(item.purchase_price || 0)
                   const sell = Number(item.expected_sale_price || 0)
                   const fees = Number(item.fees || 0)
@@ -258,7 +220,7 @@ export default function DashboardPage() {
                       </div>
                       <div className="stack-side">
                         <strong>${profit.toFixed(2)}</strong>
-                        <span className="muted">est. profit</span>
+                        <div className="muted">est. profit</div>
                       </div>
                     </div>
                   )
