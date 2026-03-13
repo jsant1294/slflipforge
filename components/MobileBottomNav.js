@@ -14,16 +14,16 @@ export default function MobileBottomNav() {
         Scan
       </Link>
 
-      <Link href="/barcode-lab">
-        Barcode
+      <Link href="/market-intelligence">
+        Market
       </Link>
 
       <Link href="/inventory-manager">
         Inventory
       </Link>
 
-      <Link href="/alerts-center">
-        Alerts
+      <Link href="/messages">
+        Messages
       </Link>
 
       <Link href="/analytics">

@@ -8,6 +8,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head />
       <body className="site-shell">
         <header className="site-header">
           <div className="site-header-inner">
