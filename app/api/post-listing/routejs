@@ -1,0 +1,8 @@
+export async function POST(req) {
+  const body = await req.json()
+  return Response.json({
+    ok: true,
+    message: `Prototype listing post sent to ${body.platform || 'selected marketplace'}.`
+  })
+}
+
