@@ -8,33 +8,44 @@ export default function DashboardPage() {
   const [items, setItems] = useState([])
   const [opportunities, setOpportunities] = useState([])
   const [alerts, setAlerts] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadDashboard()
   }, [])
 
   async function loadDashboard() {
-    const [{ data: itemsData }, { data: opportunitiesData }, { data: alertsData }] =
-      await Promise.all([
-        supabase.from('items').select('*').order('created_at', { ascending: false }),
-        supabase.from('sourcing_opportunities').select('*').order('created_at', { ascending: false }),
-        supabase.from('flipbot_alerts').select('*').order('created_at', { ascending: false }),
-      ])
+    setLoading(true)
+
+    const [
+      { data: itemsData },
+      { data: opportunitiesData },
+      { data: alertsData }
+    ] = await Promise.all([
+      supabase.from('items').select('*').order('created_at', { ascending: false }),
+      supabase.from('sourcing_opportunities').select('*').order('created_at', { ascending: false }),
+      supabase.from('flipbot_alerts').select('*').order('created_at', { ascending: false })
+    ])
 
     setItems(itemsData || [])
     setOpportunities(opportunitiesData || [])
     setAlerts(alertsData || [])
+    setLoading(false)
+  }
+
+  function getProfit(item) {
+    const buy = Number(item.purchase_price || 0)
+    const sell = Number(item.expected_sale_price || 0)
+    const fees = Number(item.fees || 0)
+    const shipping = Number(item.shipping_cost || 0)
+    return sell - buy - fees - shipping
   }
 
   const stats = useMemo(() => {
     const totalInventory = items.length
 
     const potentialProfit = items.reduce((sum, item) => {
-      const buy = Number(item.purchase_price || 0)
-      const sell = Number(item.expected_sale_price || 0)
-      const fees = Number(item.fees || 0)
-      const shipping = Number(item.shipping_cost || 0)
-      return sum + (sell - buy - fees - shipping)
+      return sum + getProfit(item)
     }, 0)
 
     const activeAlerts = alerts.length
@@ -45,147 +56,215 @@ export default function DashboardPage() {
       return roi >= 50 || profit >= 50
     }).length
 
+    const bestFlip =
+      [...items].sort((a, b) => getProfit(b) - getProfit(a))[0] || null
+
     return {
       totalInventory,
       potentialProfit,
       activeAlerts,
       hotOpportunities,
+      bestFlip
     }
   }, [items, opportunities, alerts])
 
-  const bestFlip = useMemo(() => {
-    if (!opportunities.length) return null
-    return [...opportunities].sort(
-      (a, b) => Number(b.estimated_profit || 0) - Number(a.estimated_profit || 0)
-    )[0]
-  }, [opportunities])
+  const recentItems = items.slice(0, 5)
+  const recentAlerts = alerts.slice(0, 5)
 
   return (
     <main className="page">
-      <div className="container dashboard-shell">
-        <section className="hero-panel">
-          <p className="eyebrow">Reseller Intelligence</p>
-          <h1>Find profitable flips faster.</h1>
-          <p className="hero-text">
-            Scan products, estimate resale value, track inventory, and surface the best
-            opportunities from one dashboard.
+      <div className="container">
+        <div
+          className="card"
+          style={{
+            marginBottom: '24px',
+            padding: '24px',
+            background:
+              'linear-gradient(180deg, rgba(245,184,77,0.08), rgba(255,255,255,0.02))'
+          }}
+        >
+          <p className="muted" style={{ marginBottom: '8px' }}>
+            SLFlipForge
           </p>
 
-          <div className="hero-actions">
-            <Link className="btn" href="/flip-scanner">Scan Product</Link>
-            <Link className="btn btn-secondary" href="/market-scan">Run Market Scan</Link>
-            <Link className="btn btn-secondary" href="/listing-builder">AI Listing</Link>
-          </div>
-        </section>
+          <h1 style={{ marginBottom: '10px' }}>Command Center</h1>
 
-        <section className="dashboard-grid dashboard-grid-4">
-          <div className="stat-card">
-            <p>Items in Inventory</p>
-            <div className="stat-number">{stats.totalInventory}</div>
+          <p className="muted" style={{ maxWidth: '720px' }}>
+            Track inventory, profit, alerts, and sourcing opportunities from one flipping dashboard.
+          </p>
+
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              flexWrap: 'wrap',
+              marginTop: '18px'
+            }}
+          >
+            <Link href="/inventory-manager" className="btn">
+              Open Inventory
+            </Link>
+
+            <Link href="/flip-scanner" className="btn">
+              Open Scanner
+            </Link>
+
+            <Link href="/flipbot-alerts" className="btn">
+              View Alerts
+            </Link>
+          </div>
+        </div>
+
+        <div className="dashboard-grid-4" style={{ marginBottom: '24px' }}>
+          <div className="card">
+            <p className="muted">Total Inventory</p>
+            <h2>{stats.totalInventory}</h2>
           </div>
 
-          <div className="stat-card">
-            <p>Potential Profit</p>
-            <div className="stat-number">${stats.potentialProfit.toFixed(2)}</div>
+          <div className="card">
+            <p className="muted">Potential Profit</p>
+            <h2>${stats.potentialProfit.toFixed(2)}</h2>
           </div>
 
-          <div className="stat-card">
-            <p>Hot Opportunities</p>
-            <div className="stat-number">{stats.hotOpportunities}</div>
+          <div className="card">
+            <p className="muted">Active Alerts</p>
+            <h2>{stats.activeAlerts}</h2>
           </div>
 
-          <div className="stat-card">
-            <p>Active Alerts</p>
-            <div className="stat-number">{stats.activeAlerts}</div>
+          <div className="card">
+            <p className="muted">Hot Opportunities</p>
+            <h2>{stats.hotOpportunities}</h2>
           </div>
-        </section>
+        </div>
 
-        <section className="dashboard-grid dashboard-main-grid">
-          <div className="section-card">
-            <div className="section-head">
-              <span className="badge badge-hot">Best Flip Today</span>
+        <div className="dashboard-grid-2" style={{ marginBottom: '24px' }}>
+          <div className="card">
+            <h3 style={{ marginBottom: '16px' }}>Quick Actions</h3>
+
+            <div className="dashboard-grid-2">
+              <Link
+                href="/inventory-manager"
+                className="card"
+                style={{ textDecoration: 'none' }}
+              >
+                <strong>Inventory Manager</strong>
+                <p className="muted" style={{ marginTop: '6px' }}>
+                  Add items, update statuses, and track projected profit.
+                </p>
+              </Link>
+
+              <Link
+                href="/flip-scanner"
+                className="card"
+                style={{ textDecoration: 'none' }}
+              >
+                <strong>Flip Scanner</strong>
+                <p className="muted" style={{ marginTop: '6px' }}>
+                  Scan deals and estimate resale margin.
+                </p>
+              </Link>
+
+              <Link
+                href="/flipbot-alerts"
+                className="card"
+                style={{ textDecoration: 'none' }}
+              >
+                <strong>FlipBot Alerts</strong>
+                <p className="muted" style={{ marginTop: '6px' }}>
+                  Review sourcing alerts and hot deals.
+                </p>
+              </Link>
+
+              <Link
+                href="/inventory-manager"
+                className="card"
+                style={{ textDecoration: 'none' }}
+              >
+                <strong>Profit Dashboard</strong>
+                <p className="muted" style={{ marginTop: '6px' }}>
+                  Review profit charts, leaderboard, and ROI.
+                </p>
+              </Link>
             </div>
+          </div>
 
-            {bestFlip ? (
-              <>
-                <h2 className="spotlight-title">{bestFlip.title || 'Untitled Opportunity'}</h2>
-                <p className="muted">
-                  {bestFlip.source || 'Unknown source'} · {bestFlip.location || 'No location'}
+          <div className="card">
+            <h3 style={{ marginBottom: '16px' }}>Best Flip</h3>
+
+            {stats.bestFlip ? (
+              <div>
+                <h3 style={{ marginBottom: '8px' }}>
+                  {stats.bestFlip.item_name || 'Untitled Item'}
+                </h3>
+
+                <p className="muted" style={{ marginBottom: '12px' }}>
+                  {stats.bestFlip.marketplace || 'Unknown marketplace'} •{' '}
+                  {stats.bestFlip.status || 'inventory'}
                 </p>
 
-                <div className="spotlight-stats">
-                  <div className="spotlight-stat">
-                    <span>Buy</span>
-                    <strong>${Number(bestFlip.asking_price || 0).toFixed(2)}</strong>
-                  </div>
-                  <div className="spotlight-stat">
-                    <span>Sell</span>
-                    <strong>${Number(bestFlip.estimated_sale_price || 0).toFixed(2)}</strong>
-                  </div>
-                  <div className="spotlight-stat">
-                    <span>Profit</span>
-                    <strong>${Number(bestFlip.estimated_profit || 0).toFixed(2)}</strong>
-                  </div>
-                  <div className="spotlight-stat">
-                    <span>ROI</span>
-                    <strong>{Number(bestFlip.roi || 0).toFixed(1)}%</strong>
-                  </div>
-                </div>
-
-                <div className="hero-actions">
-                  <Link className="btn btn-secondary" href="/opportunities">View Opportunities</Link>
-                  <Link className="btn btn-secondary" href="/inventory-manager">Inventory</Link>
-                </div>
-              </>
+                <p>Buy: ${Number(stats.bestFlip.purchase_price || 0).toFixed(2)}</p>
+                <p>Sell: ${Number(stats.bestFlip.expected_sale_price || 0).toFixed(2)}</p>
+                <p>
+                  <strong>Profit: ${getProfit(stats.bestFlip).toFixed(2)}</strong>
+                </p>
+              </div>
             ) : (
-              <p className="muted">No opportunities loaded yet.</p>
+              <p className="muted">No flip data yet.</p>
             )}
           </div>
+        </div>
 
-          <div className="section-card">
-            <h3>Quick Actions</h3>
-            <div className="quick-actions-grid">
-              <Link className="quick-action-btn" href="/barcode-lab">
-                <span className="quick-action-title">Barcode Lab</span>
-                <span className="quick-action-sub">Check resale fast</span>
-              </Link>
-
-              <Link className="quick-action-btn" href="/inventory-profit">
-                <span className="quick-action-title">Profit View</span>
-                <span className="quick-action-sub">Track margins</span>
-              </Link>
-
-              <Link className="quick-action-btn" href="/listing-builder">
-                <span className="quick-action-title">Create Listing</span>
-                <span className="quick-action-sub">Build once, post anywhere</span>
-              </Link>
-
-              <Link className="quick-action-btn" href="/flipbot">
-                <span className="quick-action-title">Run FlipBot</span>
-                <span className="quick-action-sub">Find top deals</span>
+        <div className="dashboard-grid-2">
+          <div className="card">
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: '12px',
+                alignItems: 'center',
+                marginBottom: '16px'
+              }}
+            >
+              <h3>Latest Inventory</h3>
+              <Link href="/inventory-manager" className="muted">
+                Open full inventory
               </Link>
             </div>
-          </div>
-        </section>
 
-        <section className="dashboard-grid dashboard-main-grid">
-          <div className="section-card">
-            <div className="section-head">
-              <h3>Recent Alerts</h3>
-              <Link className="text-link" href="/flipbot-alerts">View all</Link>
-            </div>
-
-            {alerts.length === 0 ? (
-              <p className="muted">No recent alerts yet.</p>
+            {loading ? (
+              <p>Loading dashboard...</p>
+            ) : recentItems.length === 0 ? (
+              <p className="muted">No inventory yet.</p>
             ) : (
-              <div className="stack-list">
-                {alerts.slice(0, 3).map((alert) => (
-                  <div className="stack-item" key={alert.id}>
+              <div style={{ display: 'grid', gap: '12px' }}>
+                {recentItems.map((item) => (
+                  <div
+                    key={item.id}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      gap: '16px',
+                      alignItems: 'center',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: '12px',
+                      padding: '14px',
+                      background: 'rgba(255,255,255,0.03)'
+                    }}
+                  >
                     <div>
-                      <strong>{alert.title || 'Untitled Alert'}</strong>
+                      <strong>{item.item_name || 'Untitled Item'}</strong>
+                      <div className="muted" style={{ marginTop: '6px' }}>
+                        {item.marketplace || 'Unknown marketplace'} •{' '}
+                        {item.status || 'inventory'}
+                      </div>
                     </div>
-                    <div className="stack-side">
-                      <strong>${Number(alert.profit || 0).toFixed(2)}</strong>
+
+                    <div style={{ textAlign: 'right' }}>
+                      <div>Buy: ${Number(item.purchase_price || 0).toFixed(2)}</div>
+                      <div>Sell: ${Number(item.expected_sale_price || 0).toFixed(2)}</div>
+                      <div>
+                        <strong>Profit: ${getProfit(item).toFixed(2)}</strong>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -193,42 +272,48 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="section-card">
-            <div className="section-head">
-              <h3>Inventory Snapshot</h3>
-              <Link className="text-link" href="/inventory-manager">Open inventory</Link>
+          <div className="card">
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: '12px',
+                alignItems: 'center',
+                marginBottom: '16px'
+              }}
+            >
+              <h3>Recent Alerts</h3>
+              <Link href="/flipbot-alerts" className="muted">
+                Open alerts
+              </Link>
             </div>
 
-            {items.length === 0 ? (
-              <p className="muted">No inventory items yet.</p>
+            {loading ? (
+              <p>Loading alerts...</p>
+            ) : recentAlerts.length === 0 ? (
+              <p className="muted">No alerts yet.</p>
             ) : (
-              <div className="stack-list">
-                {items.slice(0, 3).map((item) => {
-                  const buy = Number(item.purchase_price || 0)
-                  const sell = Number(item.expected_sale_price || 0)
-                  const fees = Number(item.fees || 0)
-                  const shipping = Number(item.shipping_cost || 0)
-                  const profit = sell - buy - fees - shipping
-
-                  return (
-                    <div className="stack-item" key={item.id}>
-                      <div>
-                        <strong>{item.item_name || 'Untitled Item'}</strong>
-                        <p className="muted">
-                          {item.marketplace || 'Unknown marketplace'} · {item.status || 'inventory'}
-                        </p>
-                      </div>
-                      <div className="stack-side">
-                        <strong>${profit.toFixed(2)}</strong>
-                        <div className="muted">est. profit</div>
-                      </div>
+              <div style={{ display: 'grid', gap: '12px' }}>
+                {recentAlerts.map((alert) => (
+                  <div
+                    key={alert.id}
+                    style={{
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: '12px',
+                      padding: '14px',
+                      background: 'rgba(255,255,255,0.03)'
+                    }}
+                  >
+                    <strong>{alert.title || alert.item_name || 'Flip Alert'}</strong>
+                    <div className="muted" style={{ marginTop: '6px' }}>
+                      {alert.message || 'New opportunity detected.'}
                     </div>
-                  )
-                })}
+                  </div>
+                ))}
               </div>
             )}
           </div>
-        </section>
+        </div>
       </div>
     </main>
   )
