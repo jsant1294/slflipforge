@@ -36,6 +36,49 @@ export default function InventoryManager() {
     setLoading(false)
   }
 
+  function getProfit(item) {
+    const buy = Number(item.purchase_price || 0)
+    const sell = Number(item.expected_sale_price || 0)
+    const feeNum = Number(item.fees || 0)
+    const shipNum = Number(item.shipping_cost || 0)
+    return sell - buy - feeNum - shipNum
+  }
+
+  function getROI(item) {
+    const buy = Number(item.purchase_price || 0)
+    if (buy <= 0) return 0
+    return (getProfit(item) / buy) * 100
+  }
+
+  function getDealScore(item) {
+    const profit = getProfit(item)
+    const roi = getROI(item)
+
+    let score = 0
+
+    if (profit >= 100) score += 4
+    else if (profit >= 60) score += 3
+    else if (profit >= 30) score += 2
+    else if (profit > 0) score += 1
+
+    if (roi >= 100) score += 4
+    else if (roi >= 60) score += 3
+    else if (roi >= 30) score += 2
+    else if (roi > 0) score += 1
+
+    if ((item.marketplace || '').toLowerCase() === 'facebook') score += 1
+    if ((item.status || '') === 'inventory') score += 1
+
+    return Math.min(score, 10)
+  }
+
+  function getRecommendation(item) {
+    const score = getDealScore(item)
+    if (score >= 8) return 'BUY'
+    if (score >= 5) return 'GOOD'
+    return 'PASS'
+  }
+
   async function addItem(e) {
     e.preventDefault()
     setSaving(true)
@@ -77,10 +120,7 @@ export default function InventoryManager() {
     const ok = window.confirm('Delete this item?')
     if (!ok) return
 
-    const { error } = await supabase
-      .from('items')
-      .delete()
-      .eq('id', id)
+    const { error } = await supabase.from('items').delete().eq('id', id)
 
     if (!error) {
       setItems((prev) => prev.filter((item) => item.id !== id))
@@ -100,15 +140,6 @@ export default function InventoryManager() {
         )
       )
     }
-  }
-
-  function getProfit(item) {
-    const buy = Number(item.purchase_price || 0)
-    const sell = Number(item.expected_sale_price || 0)
-    const feeNum = Number(item.fees || 0)
-    const shipNum = Number(item.shipping_cost || 0)
-
-    return sell - buy - feeNum - shipNum
   }
 
   const stats = useMemo(() => {
@@ -136,6 +167,14 @@ export default function InventoryManager() {
       .filter((item) => item.status === 'sold')
       .reduce((sum, item) => sum + getProfit(item), 0)
 
+    const avgROI =
+      items.length > 0
+        ? items.reduce((sum, item) => sum + getROI(item), 0) / items.length
+        : 0
+
+    const bestDeal =
+      [...items].sort((a, b) => getDealScore(b) - getDealScore(a))[0] || null
+
     return {
       totalItems,
       inventoryCount,
@@ -144,15 +183,30 @@ export default function InventoryManager() {
       totalCost,
       projectedRevenue,
       projectedProfit,
-      soldProfit
+      soldProfit,
+      avgROI,
+      bestDeal
     }
+  }, [items])
+
+  const leaderboard = useMemo(() => {
+    return [...items]
+      .map((item) => ({
+        ...item,
+        profit: getProfit(item),
+        roi: getROI(item)
+      }))
+      .sort((a, b) => b.profit - a.profit)
+      .slice(0, 5)
   }, [items])
 
   return (
     <main className="page">
       <div className="container">
         <h1>Inventory Manager</h1>
-        <p className="muted">Track every flip and monitor projected profit.</p>
+        <p className="muted">
+          Track every flip, score every deal, and monitor projected profit.
+        </p>
 
         <div
           style={{
@@ -212,8 +266,154 @@ export default function InventoryManager() {
           </div>
         </div>
 
-        <div className="card" style={{ marginBottom: '24px', padding: '20px' }}>
-          <h3>Profit Overview + Leaderboard</h3>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+            gap: '16px',
+            marginBottom: '24px'
+          }}
+        >
+          <div className="card">
+            <p className="muted">Average ROI</p>
+            <h2>{stats.avgROI.toFixed(1)}%</h2>
+          </div>
+
+          <div className="card">
+            <p className="muted">Best Deal Score</p>
+            <h2>{stats.bestDeal ? getDealScore(stats.bestDeal) : 0}/10</h2>
+          </div>
+        </div>
+
+        <div
+          className="card"
+          style={{
+            marginBottom: '24px',
+            padding: '28px',
+            background: 'linear-gradient(135deg,#0f172a,#1e293b)'
+          }}
+        >
+          <h3 style={{ marginBottom: '12px' }}>🚀 Rocket Profit Counter</h3>
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+          >
+            <div>
+              <p className="muted">Total Potential Profit</p>
+              <h2 style={{ fontSize: '34px', fontWeight: '700' }}>
+                ${stats.projectedProfit.toFixed(2)}
+              </h2>
+            </div>
+
+            <div
+              style={{
+                fontSize: '42px',
+                animation: 'rocketFloat 2s ease-in-out infinite'
+              }}
+            >
+              🚀
+            </div>
+          </div>
+
+          <p className="muted" style={{ marginTop: '8px' }}>
+            Every flip fuels the rocket.
+          </p>
+        </div>
+
+        <div className="card" style={{ marginBottom: '24px' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: '12px',
+              marginBottom: '16px'
+            }}
+          >
+            <div>
+              <p className="muted" style={{ marginBottom: '6px' }}>
+                Performance
+              </p>
+              <h3>Flip Leaderboard</h3>
+            </div>
+          </div>
+
+          {loading ? (
+            <p>Loading leaderboard...</p>
+          ) : leaderboard.length === 0 ? (
+            <p className="muted">No flips yet.</p>
+          ) : (
+            <div style={{ display: 'grid', gap: '12px' }}>
+              {leaderboard.map((item, index) => (
+                <div
+                  key={item.id}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '72px 1.4fr 1fr 1fr 1fr',
+                    gap: '12px',
+                    alignItems: 'center',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: '12px',
+                    padding: '14px',
+                    background:
+                      index === 0
+                        ? 'linear-gradient(180deg, rgba(245,184,77,0.10), rgba(255,255,255,0.03))'
+                        : 'rgba(255,255,255,0.03)'
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '999px',
+                        display: 'grid',
+                        placeItems: 'center',
+                        background: index === 0 ? '#f5b84d' : 'rgba(255,255,255,0.08)',
+                        color: index === 0 ? '#111' : '#fff',
+                        fontWeight: 800
+                      }}
+                    >
+                      #{index + 1}
+                    </div>
+                  </div>
+
+                  <div>
+                    <strong>{item.item_name || 'Untitled Item'}</strong>
+                    <div className="muted" style={{ marginTop: '6px' }}>
+                      {item.marketplace || 'Unknown marketplace'} • {item.status || 'inventory'}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="muted">Buy</div>
+                    <strong>${Number(item.purchase_price || 0).toFixed(2)}</strong>
+                  </div>
+
+                  <div>
+                    <div className="muted">Sell</div>
+                    <strong>${Number(item.expected_sale_price || 0).toFixed(2)}</strong>
+                  </div>
+
+                  <div>
+                    <div className="muted">Profit / ROI</div>
+                    <strong>${Number(item.profit || 0).toFixed(2)}</strong>
+                    <div className="muted" style={{ marginTop: '4px' }}>
+                      {item.roi.toFixed(1)}% ROI
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="card" style={{ marginBottom: '24px' }}>
+          <h3>Profit Overview</h3>
           <ProfitChart items={items} />
         </div>
 
@@ -236,10 +436,7 @@ export default function InventoryManager() {
               required
             />
 
-            <select
-              value={marketplace}
-              onChange={(e) => setMarketplace(e.target.value)}
-            >
+            <select value={marketplace} onChange={(e) => setMarketplace(e.target.value)}>
               <option>Facebook</option>
               <option>Craigslist</option>
               <option>OfferUp</option>
@@ -325,8 +522,11 @@ export default function InventoryManager() {
                   <p>Sell: ${Number(item.expected_sale_price || 0).toFixed(2)}</p>
                   <p>Fees: ${Number(item.fees || 0).toFixed(2)}</p>
                   <p>Shipping: ${Number(item.shipping_cost || 0).toFixed(2)}</p>
+                  <p><strong>Profit: ${getProfit(item).toFixed(2)}</strong></p>
+                  <p><strong>ROI: {getROI(item).toFixed(1)}%</strong></p>
                   <p>
-                    <strong>Profit: ${getProfit(item).toFixed(2)}</strong>
+                    <strong>Deal Score: {getDealScore(item)}/10</strong> •{' '}
+                    {getRecommendation(item)}
                   </p>
 
                   <div
@@ -337,63 +537,19 @@ export default function InventoryManager() {
                       marginTop: '14px'
                     }}
                   >
-                    <button
-                      type="button"
-                      onClick={() => updateStatus(item.id, 'inventory')}
-                      style={{
-                        background: item.status === 'inventory' ? '#f5b84d' : 'transparent',
-                        color: item.status === 'inventory' ? '#07122b' : '#f5b84d',
-                        border: '1px solid rgba(245,184,77,0.35)',
-                        borderRadius: '10px',
-                        padding: '8px 12px',
-                        cursor: 'pointer'
-                      }}
-                    >
+                    <button type="button" onClick={() => updateStatus(item.id, 'inventory')}>
                       Inventory
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => updateStatus(item.id, 'listed')}
-                      style={{
-                        background: item.status === 'listed' ? '#f5b84d' : 'transparent',
-                        color: item.status === 'listed' ? '#07122b' : '#f5b84d',
-                        border: '1px solid rgba(245,184,77,0.35)',
-                        borderRadius: '10px',
-                        padding: '8px 12px',
-                        cursor: 'pointer'
-                      }}
-                    >
+                    <button type="button" onClick={() => updateStatus(item.id, 'listed')}>
                       Listed
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => updateStatus(item.id, 'sold')}
-                      style={{
-                        background: item.status === 'sold' ? '#f5b84d' : 'transparent',
-                        color: item.status === 'sold' ? '#07122b' : '#f5b84d',
-                        border: '1px solid rgba(245,184,77,0.35)',
-                        borderRadius: '10px',
-                        padding: '8px 12px',
-                        cursor: 'pointer'
-                      }}
-                    >
+                    <button type="button" onClick={() => updateStatus(item.id, 'sold')}>
                       Sold
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => deleteItem(item.id)}
-                      style={{
-                        background: 'transparent',
-                        color: '#f5b84d',
-                        border: '1px solid rgba(245,184,77,0.35)',
-                        borderRadius: '10px',
-                        padding: '8px 12px',
-                        cursor: 'pointer'
-                      }}
-                    >
+                    <button type="button" onClick={() => deleteItem(item.id)}>
                       Delete
                     </button>
                   </div>
