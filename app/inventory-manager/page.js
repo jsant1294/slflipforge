@@ -116,6 +116,12 @@ export default function InventoryManager() {
             <p className="muted">Items</p>
             <h2>{stats.totalItems}</h2>
           </div>
+          {/* Profit Chart */}
+
+<div className="card" style={{ marginBottom: '24px' }}>
+  <h3>Profit Overview</h3>
+  <ProfitChart items={items} />
+</div>
           <div className="card" style={{ marginBottom: '24px' }}>
   <h3>Profit Overview</h3>
   <ProfitChart items={items} />
