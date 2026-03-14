@@ -19,15 +19,16 @@ export default function ProfitChart({ items }) {
       Number(item.shipping_cost || 0)
   }))
 
-  return (
-  <div style={{ width: '100%', height: 320 }}>
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={data}>
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Bar dataKey="profit" fill="#f5b84d" radius={[4,4,0,0]} />
-      </BarChart>
-    </ResponsiveContainer>
-  </div>
-)
+    return (
+    <div style={{ width: '100%', height: 320 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data}>
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Bar dataKey="profit" fill="#f5b84d" radius={[4,4,0,0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
