@@ -1,5 +1,5 @@
 'use client'
-
+import ProfitChart from '../../components/ProfitChart'
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 
@@ -116,6 +116,10 @@ export default function InventoryManager() {
             <p className="muted">Items</p>
             <h2>{stats.totalItems}</h2>
           </div>
+          <div className="card" style={{ marginBottom: '24px' }}>
+  <h3>Profit Overview</h3>
+  <ProfitChart items={items} />
+</div>
           <div className="card">
             <p className="muted">Inventory Cost</p>
             <h2>${stats.totalCost.toFixed(2)}</h2>
