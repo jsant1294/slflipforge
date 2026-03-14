@@ -212,7 +212,7 @@ export default function InventoryManager() {
           </div>
         </div>
 
-        <div className="card" style={{ marginBottom: '24px' }}>
+        <div className="card" style={{ marginBottom: '24px', padding: '20px' }}>
           <h3>Profit Overview</h3>
           <ProfitChart items={items} />
         </div>
