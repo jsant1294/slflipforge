@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '../../lib/supabaseClient'
 import ProfitChart from '../../components/ProfitChart'
-import ProfitChart from '../components/ProfitChart'
+
 
 export default function DashboardPage() {
 
