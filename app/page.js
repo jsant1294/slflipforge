@@ -1,8 +1,121 @@
 'use client'
 
 import Link from 'next/link'
+import { useMemo, useState } from 'react'
 
 export default function HomePage() {
+  const [language, setLanguage] = useState('en')
+
+  const copy = useMemo(() => {
+    if (language === 'es') {
+      return {
+        badge: 'SLFlipForge',
+        heroTitle1: 'Convierte tu inventario',
+        heroTitle2: 'en ganancias.',
+        heroText:
+          'El sistema operativo para revendedores que quieren publicar más rápido, calcular márgenes y crecer como vendedor cohete.',
+        primaryCta: 'Entrar al Command Center',
+        secondaryCta: 'Abrir Inventario',
+        stat1Title: 'Publica rápido',
+        stat1Text: 'Publica productos en segundos',
+        stat2Title: 'Venta bilingüe',
+        stat2Text: 'Vende en inglés y español',
+        stat3Title: 'Ganancia primero',
+        stat3Text: 'Maximiza cada flip',
+        rocketCardTitle: 'Modo Vendedor Cohete',
+        rocketCardText:
+          'Controla flips, detecta oportunidades y mueve inventario con más confianza.',
+        signalTitle: 'Señal de FlipBot',
+        signalText: 'Ganancia esperada: $84 • ROI: 71% • Recomendación: COMPRAR',
+        toolsTitle1: 'Administrador de Inventario',
+        toolsText1: 'Agrega inventario, cambia estados y controla márgenes.',
+        toolsTitle2: 'Escáner de Flips',
+        toolsText2: 'Evalúa productos y estima valor de reventa rápido.',
+        toolsTitle3: 'Analítica de Ganancias',
+        toolsText3: 'Visualiza utilidad, ranking y ROI.',
+        toolsTitle4: 'Alertas FlipBot',
+        toolsText4: 'Descubre oportunidades y señales de compra.',
+        howBadge: 'Cómo funciona',
+        howTitle: 'Del sourcing a la ganancia en un solo flujo',
+        howText:
+          'SLFlipForge le da al revendedor un sistema claro para encontrar productos, estimar ganancias, organizar inventario y vender mejor.',
+        step1Title: '1. Encuentra la oportunidad',
+        step1Text: 'Busca productos y detecta flips prometedores.',
+        step2Title: '2. Calcula el margen',
+        step2Text: 'Mide reventa, fees, shipping y ROI.',
+        step3Title: '3. Escala la operación',
+        step3Text: 'Controla inventario, listados y ventas.',
+        finalBadge: '¿Listo para vender más rápido?',
+        finalTitle: 'Conviértete en vendedor cohete con SLFlipForge',
+        finalText:
+          'Activa tu flujo de reventa, controla cada margen y construye una operación real con un dashboard hecho para flippers.',
+        finalPrimary: 'Entrar a SLFlipForge',
+        finalSecondary: 'Comenzar con Inventario',
+        visualTop: 'SL',
+        visualBrand: 'FLIPFORGE',
+        visualHeadline: 'Conviértete en un vendedor cohete',
+        visualBullet1: 'Publica productos en segundos',
+        visualBullet2: 'Vende en inglés y español',
+        visualBullet3: 'Maximiza tus ganancias',
+        visualButton: 'ENTRA AHORA',
+        visualSub: 'y empieza a ganar dinero'
+      }
+    }
+
+    return {
+      badge: 'SLFlipForge',
+      heroTitle1: 'Turn inventory',
+      heroTitle2: 'into profit.',
+      heroText:
+        'The reseller operating system for flippers who want to publish faster, track margins, and grow like a rocket seller.',
+      primaryCta: 'Launch Command Center',
+      secondaryCta: 'Open Inventory',
+      stat1Title: 'Post faster',
+      stat1Text: 'Publish products in seconds',
+      stat2Title: 'Bilingual selling',
+      stat2Text: 'Sell in English and Spanish',
+      stat3Title: 'Profit first',
+      stat3Text: 'Maximize every flip',
+      rocketCardTitle: 'Rocket Seller Mode',
+      rocketCardText:
+        'Track flips, spot opportunities, and move inventory with more confidence.',
+      signalTitle: 'FlipBot Signal',
+      signalText: 'Expected Profit: $84 • ROI: 71% • Recommendation: BUY',
+      toolsTitle1: 'Inventory Manager',
+      toolsText1: 'Add inventory, update statuses, and track margins.',
+      toolsTitle2: 'Flip Scanner',
+      toolsText2: 'Evaluate products and estimate resale value fast.',
+      toolsTitle3: 'Profit Analytics',
+      toolsText3: 'Visualize profit, leaderboard flips, and ROI.',
+      toolsTitle4: 'FlipBot Alerts',
+      toolsText4: 'Surface hot opportunities and sourcing signals.',
+      howBadge: 'How it works',
+      howTitle: 'From sourcing to profit in one workflow',
+      howText:
+        'SLFlipForge gives flippers a focused operating system: source smarter, estimate faster, organize inventory, and keep profit visible at every step.',
+      step1Title: '1. Find the deal',
+      step1Text: 'Source products and identify promising flips.',
+      step2Title: '2. Estimate the margin',
+      step2Text: 'Measure resale, fees, shipping, and ROI.',
+      step3Title: '3. Scale the operation',
+      step3Text: 'Track inventory, listings, and sold items.',
+      finalBadge: 'Ready to sell faster?',
+      finalTitle: 'Become a rocket seller with SLFlipForge',
+      finalText:
+        'Launch your flipping workflow, track every margin, and build a real operation with a dashboard made for resellers.',
+      finalPrimary: 'Enter SLFlipForge',
+      finalSecondary: 'Start with Inventory',
+      visualTop: 'SL',
+      visualBrand: 'FLIPFORGE',
+      visualHeadline: 'Become a rocket seller',
+      visualBullet1: 'Publish products in seconds',
+      visualBullet2: 'Sell in English and Spanish',
+      visualBullet3: 'Maximize your profits',
+      visualButton: 'ENTER NOW',
+      visualSub: 'and start making money'
+    }
+  }, [language])
+
   return (
     <main className="page">
       <div className="container">
@@ -16,9 +129,45 @@ export default function HomePage() {
           }}
         >
           <div
-            className="dashboard-grid-2"
-            style={{ alignItems: 'center' }}
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              marginBottom: '20px'
+            }}
           >
+            <div
+              className="card"
+              style={{
+                display: 'inline-flex',
+                gap: '8px',
+                padding: '8px'
+              }}
+            >
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setLanguage('en')}
+                style={{
+                  opacity: language === 'en' ? 1 : 0.65
+                }}
+              >
+                EN
+              </button>
+
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setLanguage('es')}
+                style={{
+                  opacity: language === 'es' ? 1 : 0.65
+                }}
+              >
+                ES
+              </button>
+            </div>
+          </div>
+
+          <div className="dashboard-grid-2" style={{ alignItems: 'center' }}>
             <div>
               <p
                 className="muted"
@@ -28,7 +177,7 @@ export default function HomePage() {
                   textTransform: 'uppercase'
                 }}
               >
-                SLFlipForge
+                {copy.badge}
               </p>
 
               <h1
@@ -38,9 +187,9 @@ export default function HomePage() {
                   marginBottom: '16px'
                 }}
               >
-                Turn inventory
+                {copy.heroTitle1}
                 <br />
-                into profit.
+                {copy.heroTitle2}
               </h1>
 
               <p
@@ -51,8 +200,7 @@ export default function HomePage() {
                   marginBottom: '22px'
                 }}
               >
-                The reseller operating system for fast-moving flippers. Track inventory,
-                estimate margins, publish faster, and grow like a rocket seller.
+                {copy.heroText}
               </p>
 
               <div
@@ -64,7 +212,7 @@ export default function HomePage() {
                 }}
               >
                 <Link href="/dashboard" className="btn">
-                  Launch Command Center
+                  {copy.primaryCta}
                 </Link>
 
                 <Link
@@ -77,7 +225,7 @@ export default function HomePage() {
                     alignItems: 'center'
                   }}
                 >
-                  View Inventory Manager
+                  {copy.secondaryCta}
                 </Link>
               </div>
 
@@ -90,23 +238,23 @@ export default function HomePage() {
                 }}
               >
                 <div className="card">
-                  <strong>Post faster</strong>
+                  <strong>{copy.stat1Title}</strong>
                   <div className="muted" style={{ marginTop: '6px' }}>
-                    Publish products in seconds
+                    {copy.stat1Text}
                   </div>
                 </div>
 
                 <div className="card">
-                  <strong>Bilingual selling</strong>
+                  <strong>{copy.stat2Title}</strong>
                   <div className="muted" style={{ marginTop: '6px' }}>
-                    Sell in English and Spanish
+                    {copy.stat2Text}
                   </div>
                 </div>
 
                 <div className="card">
-                  <strong>Profit first</strong>
+                  <strong>{copy.stat3Title}</strong>
                   <div className="muted" style={{ marginTop: '6px' }}>
-                    Maximize every flip
+                    {copy.stat3Text}
                   </div>
                 </div>
               </div>
@@ -116,19 +264,93 @@ export default function HomePage() {
               <div
                 className="card"
                 style={{
-                  minHeight: '420px',
+                  minHeight: '520px',
                   position: 'relative',
                   overflow: 'hidden',
                   background:
-                    'radial-gradient(circle at top right, rgba(245,184,77,0.28), transparent 30%), linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))'
+                    'radial-gradient(circle at top right, rgba(245,184,77,0.30), transparent 28%), radial-gradient(circle at 80% 35%, rgba(255,120,0,0.20), transparent 18%), linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))'
                 }}
               >
                 <div
                   style={{
                     position: 'absolute',
-                    top: '22px',
-                    right: '22px',
-                    fontSize: '2.6rem'
+                    inset: 0,
+                    background:
+                      'linear-gradient(180deg, rgba(4,10,24,0.15), rgba(4,10,24,0.55))'
+                  }}
+                />
+
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '28px',
+                    left: '28px',
+                    right: '28px',
+                    zIndex: 2
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      marginBottom: '18px'
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '64px',
+                        height: '64px',
+                        borderRadius: '50%',
+                        display: 'grid',
+                        placeItems: 'center',
+                        background: 'linear-gradient(180deg, #2957c7, #15306e)',
+                        border: '2px solid rgba(255,255,255,0.35)',
+                        color: '#fff',
+                        fontWeight: 800,
+                        fontSize: '1.4rem',
+                        boxShadow: '0 12px 30px rgba(0,0,0,0.25)'
+                      }}
+                    >
+                      {copy.visualTop}
+                    </div>
+
+                    <div
+                      style={{
+                        fontWeight: 900,
+                        fontSize: 'clamp(1.6rem, 3vw, 2.6rem)',
+                        letterSpacing: '0.02em',
+                        background: 'linear-gradient(90deg, #ffffff, #f5b84d 70%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                      }}
+                    >
+                      {copy.visualBrand}
+                    </div>
+                  </div>
+
+                  <h2
+                    style={{
+                      fontSize: 'clamp(2rem, 4vw, 3.4rem)',
+                      lineHeight: 1,
+                      marginBottom: '12px',
+                      textTransform: 'uppercase',
+                      maxWidth: '520px'
+                    }}
+                  >
+                    {copy.visualHeadline}
+                  </h2>
+                </div>
+
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '150px',
+                    right: '36px',
+                    fontSize: '6rem',
+                    filter: 'drop-shadow(0 22px 40px rgba(0,0,0,0.45))',
+                    transform: 'rotate(12deg)',
+                    zIndex: 2
                   }}
                 >
                   🚀
@@ -137,45 +359,96 @@ export default function HomePage() {
                 <div
                   style={{
                     position: 'absolute',
-                    inset: 'auto 20px 20px 20px'
+                    left: '24px',
+                    bottom: '26px',
+                    right: '24px',
+                    zIndex: 2
                   }}
                 >
                   <div
                     style={{
                       display: 'grid',
-                      gap: '12px'
+                      gap: '10px',
+                      marginBottom: '18px'
                     }}
                   >
                     <div className="card">
-                      <strong>Rocket Seller Mode</strong>
-                      <p className="muted" style={{ marginTop: '8px' }}>
-                        Track flips, spot high-margin deals, and move inventory with confidence.
-                      </p>
-                    </div>
-
-                    <div className="dashboard-grid-2">
-                      <div className="card">
-                        <p className="muted">Projected Profit</p>
-                        <h2>$2,480</h2>
-                      </div>
-
-                      <div className="card">
-                        <p className="muted">Best ROI</p>
-                        <h2>118%</h2>
-                      </div>
+                      <strong>🚀 {copy.visualBullet1}</strong>
                     </div>
 
                     <div className="card">
-                      <p className="muted" style={{ marginBottom: '8px' }}>
-                        FlipBot Signal
-                      </p>
-                      <strong>Milwaukee M18 Bundle</strong>
-                      <div className="muted" style={{ marginTop: '6px' }}>
-                        Expected Profit: $84 • ROI: 71% • Recommendation: BUY
-                      </div>
+                      <strong>🌎 {copy.visualBullet2}</strong>
+                    </div>
+
+                    <div className="card">
+                      <strong>💰 {copy.visualBullet3}</strong>
                     </div>
                   </div>
+
+                  <div
+                    style={{
+                      display: 'inline-block',
+                      background: 'linear-gradient(180deg, #f6c15d, #e5a42d)',
+                      color: '#111',
+                      padding: '14px 22px',
+                      borderRadius: '14px',
+                      fontWeight: 900,
+                      fontSize: '1.15rem',
+                      boxShadow: '0 18px 40px rgba(245,184,77,0.22)',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    {copy.visualButton}
+                  </div>
+
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      opacity: 0.9,
+                      marginBottom: '8px'
+                    }}
+                  >
+                    {copy.visualSub}
+                  </div>
+
+                  <div
+                    style={{
+                      fontWeight: 900,
+                      fontSize: 'clamp(1.2rem, 2vw, 2rem)',
+                      letterSpacing: '0.03em'
+                    }}
+                  >
+                    SLFLIPFORGE.COM
+                  </div>
                 </div>
+
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 'auto auto 120px 24px',
+                    width: '180px',
+                    height: '120px',
+                    borderRadius: '16px',
+                    background:
+                      'linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03))',
+                    border: '1px solid rgba(255,255,255,0.10)',
+                    transform: 'rotate(-6deg)',
+                    zIndex: 1
+                  }}
+                />
+
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 'auto 24px 150px auto',
+                    width: '110px',
+                    height: '110px',
+                    borderRadius: '50%',
+                    background:
+                      'radial-gradient(circle, rgba(245,184,77,0.22), rgba(245,184,77,0.02) 70%)',
+                    zIndex: 1
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -185,33 +458,33 @@ export default function HomePage() {
           <div className="dashboard-grid-4">
             <div className="card">
               <div style={{ fontSize: '1.8rem', marginBottom: '10px' }}>📦</div>
-              <strong>Inventory Manager</strong>
+              <strong>{copy.toolsTitle1}</strong>
               <p className="muted" style={{ marginTop: '8px' }}>
-                Add inventory, update statuses, and track margins.
+                {copy.toolsText1}
               </p>
             </div>
 
             <div className="card">
               <div style={{ fontSize: '1.8rem', marginBottom: '10px' }}>📷</div>
-              <strong>Flip Scanner</strong>
+              <strong>{copy.toolsTitle2}</strong>
               <p className="muted" style={{ marginTop: '8px' }}>
-                Evaluate products and estimate resale value fast.
+                {copy.toolsText2}
               </p>
             </div>
 
             <div className="card">
               <div style={{ fontSize: '1.8rem', marginBottom: '10px' }}>📈</div>
-              <strong>Profit Analytics</strong>
+              <strong>{copy.toolsTitle3}</strong>
               <p className="muted" style={{ marginTop: '8px' }}>
-                Visualize profit, leaderboard flips, and ROI.
+                {copy.toolsText3}
               </p>
             </div>
 
             <div className="card">
               <div style={{ fontSize: '1.8rem', marginBottom: '10px' }}>🚨</div>
-              <strong>FlipBot Alerts</strong>
+              <strong>{copy.toolsTitle4}</strong>
               <p className="muted" style={{ marginTop: '8px' }}>
-                Surface hot opportunities and sourcing signals.
+                {copy.toolsText4}
               </p>
             </div>
           </div>
@@ -221,42 +494,36 @@ export default function HomePage() {
           className="card"
           style={{ marginBottom: '24px', padding: '24px' }}
         >
-          <div
-            className="dashboard-grid-2"
-            style={{ alignItems: 'start' }}
-          >
+          <div className="dashboard-grid-2" style={{ alignItems: 'start' }}>
             <div>
               <p className="muted" style={{ marginBottom: '10px' }}>
-                How it works
+                {copy.howBadge}
               </p>
-              <h2 style={{ marginBottom: '14px' }}>
-                From sourcing to profit in one workflow
-              </h2>
+              <h2 style={{ marginBottom: '14px' }}>{copy.howTitle}</h2>
               <p className="muted" style={{ maxWidth: '620px' }}>
-                SLFlipForge gives flippers a focused operating system: source smarter,
-                evaluate faster, organize inventory, and keep profit visible at every step.
+                {copy.howText}
               </p>
             </div>
 
             <div style={{ display: 'grid', gap: '12px' }}>
               <div className="card">
-                <strong>1. Find the deal</strong>
+                <strong>{copy.step1Title}</strong>
                 <div className="muted" style={{ marginTop: '6px' }}>
-                  Source products and scan opportunities.
+                  {copy.step1Text}
                 </div>
               </div>
 
               <div className="card">
-                <strong>2. Estimate the flip</strong>
+                <strong>{copy.step2Title}</strong>
                 <div className="muted" style={{ marginTop: '6px' }}>
-                  Calculate resale, fees, shipping, and ROI.
+                  {copy.step2Text}
                 </div>
               </div>
 
               <div className="card">
-                <strong>3. Scale the hustle</strong>
+                <strong>{copy.step3Title}</strong>
                 <div className="muted" style={{ marginTop: '6px' }}>
-                  Track listed, sold, and best-performing inventory.
+                  {copy.step3Text}
                 </div>
               </div>
             </div>
@@ -274,18 +541,16 @@ export default function HomePage() {
           }}
         >
           <p className="muted" style={{ marginBottom: '8px' }}>
-            Ready to flip faster?
+            {copy.finalBadge}
           </p>
 
-          <h2 style={{ marginBottom: '12px' }}>
-            Become a rocket seller with SLFlipForge
-          </h2>
+          <h2 style={{ marginBottom: '12px' }}>{copy.finalTitle}</h2>
 
           <p
             className="muted"
             style={{ maxWidth: '720px', margin: '0 auto 18px auto' }}
           >
-            Launch your flipping workflow, track every margin, and build momentum with a real reseller dashboard.
+            {copy.finalText}
           </p>
 
           <div
@@ -297,7 +562,7 @@ export default function HomePage() {
             }}
           >
             <Link href="/dashboard" className="btn">
-              Enter SLFlipForge
+              {copy.finalPrimary}
             </Link>
 
             <Link
@@ -310,7 +575,7 @@ export default function HomePage() {
                 alignItems: 'center'
               }}
             >
-              Start with Inventory
+              {copy.finalSecondary}
             </Link>
           </div>
         </section>
