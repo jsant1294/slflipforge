@@ -1,7 +1,8 @@
 'use client'
-import ProfitChart from '../../components/ProfitChart'
+
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
+import ProfitChart from '../../components/ProfitChart'
 
 export default function InventoryManager() {
   const [items, setItems] = useState([])
@@ -76,10 +77,28 @@ export default function InventoryManager() {
     const ok = window.confirm('Delete this item?')
     if (!ok) return
 
-    const { error } = await supabase.from('items').delete().eq('id', id)
+    const { error } = await supabase
+      .from('items')
+      .delete()
+      .eq('id', id)
 
     if (!error) {
       setItems((prev) => prev.filter((item) => item.id !== id))
+    }
+  }
+
+  async function updateStatus(id, newStatus) {
+    const { error } = await supabase
+      .from('items')
+      .update({ status: newStatus })
+      .eq('id', id)
+
+    if (!error) {
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, status: newStatus } : item
+        )
+      )
     }
   }
 
@@ -88,20 +107,44 @@ export default function InventoryManager() {
     const sell = Number(item.expected_sale_price || 0)
     const feeNum = Number(item.fees || 0)
     const shipNum = Number(item.shipping_cost || 0)
+
     return sell - buy - feeNum - shipNum
   }
 
   const stats = useMemo(() => {
     const totalItems = items.length
-    const totalCost = items.reduce((sum, item) => sum + Number(item.purchase_price || 0), 0)
-    const projectedRevenue = items.reduce((sum, item) => sum + Number(item.expected_sale_price || 0), 0)
-    const projectedProfit = items.reduce((sum, item) => sum + getProfit(item), 0)
+    const inventoryCount = items.filter((item) => item.status === 'inventory').length
+    const listedCount = items.filter((item) => item.status === 'listed').length
+    const soldCount = items.filter((item) => item.status === 'sold').length
+
+    const totalCost = items.reduce(
+      (sum, item) => sum + Number(item.purchase_price || 0),
+      0
+    )
+
+    const projectedRevenue = items.reduce(
+      (sum, item) => sum + Number(item.expected_sale_price || 0),
+      0
+    )
+
+    const projectedProfit = items.reduce(
+      (sum, item) => sum + getProfit(item),
+      0
+    )
+
+    const soldProfit = items
+      .filter((item) => item.status === 'sold')
+      .reduce((sum, item) => sum + getProfit(item), 0)
 
     return {
       totalItems,
+      inventoryCount,
+      listedCount,
+      soldCount,
       totalCost,
       projectedRevenue,
-      projectedProfit
+      projectedProfit,
+      soldProfit
     }
   }, [items])
 
@@ -111,39 +154,81 @@ export default function InventoryManager() {
         <h1>Inventory Manager</h1>
         <p className="muted">Track every flip and monitor projected profit.</p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '16px', margin: '24px 0' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+            gap: '16px',
+            margin: '24px 0'
+          }}
+        >
           <div className="card">
             <p className="muted">Items</p>
             <h2>{stats.totalItems}</h2>
           </div>
-          {/* Profit Chart */}
 
-<div className="card" style={{ marginBottom: '24px' }}>
-  <h3>Profit Overview</h3>
-  <ProfitChart items={items} />
-</div>
-          <div className="card" style={{ marginBottom: '24px' }}>
-  <h3>Profit Overview</h3>
-  <ProfitChart items={items} />
-</div>
+          <div className="card">
+            <p className="muted">Inventory</p>
+            <h2>{stats.inventoryCount}</h2>
+          </div>
+
+          <div className="card">
+            <p className="muted">Listed</p>
+            <h2>{stats.listedCount}</h2>
+          </div>
+
+          <div className="card">
+            <p className="muted">Sold</p>
+            <h2>{stats.soldCount}</h2>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+            gap: '16px',
+            margin: '0 0 24px 0'
+          }}
+        >
           <div className="card">
             <p className="muted">Inventory Cost</p>
             <h2>${stats.totalCost.toFixed(2)}</h2>
           </div>
+
           <div className="card">
             <p className="muted">Projected Revenue</p>
             <h2>${stats.projectedRevenue.toFixed(2)}</h2>
           </div>
+
           <div className="card">
             <p className="muted">Projected Profit</p>
             <h2>${stats.projectedProfit.toFixed(2)}</h2>
           </div>
+
+          <div className="card">
+            <p className="muted">Sold Profit</p>
+            <h2>${stats.soldProfit.toFixed(2)}</h2>
+          </div>
+        </div>
+
+        <div className="card" style={{ marginBottom: '24px' }}>
+          <h3>Profit Overview</h3>
+          <ProfitChart items={items} />
         </div>
 
         <div className="card" style={{ marginBottom: '24px' }}>
           <h3>Add Item</h3>
 
-          <form onSubmit={addItem} style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '12px', marginTop: '16px' }}>
+          <form
+            onSubmit={addItem}
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+              gap: '12px',
+              marginTop: '16px'
+            }}
+          >
             <input
               value={itemName}
               onChange={(e) => setItemName(e.target.value)}
@@ -151,7 +236,10 @@ export default function InventoryManager() {
               required
             />
 
-            <select value={marketplace} onChange={(e) => setMarketplace(e.target.value)}>
+            <select
+              value={marketplace}
+              onChange={(e) => setMarketplace(e.target.value)}
+            >
               <option>Facebook</option>
               <option>Craigslist</option>
               <option>OfferUp</option>
@@ -225,7 +313,9 @@ export default function InventoryManager() {
                     background: 'rgba(255,255,255,0.03)'
                   }}
                 >
-                  <h3 style={{ marginBottom: '8px' }}>{item.item_name || 'Untitled Item'}</h3>
+                  <h3 style={{ marginBottom: '8px' }}>
+                    {item.item_name || 'Untitled Item'}
+                  </h3>
 
                   <p className="muted" style={{ marginBottom: '10px' }}>
                     {item.marketplace || 'Unknown marketplace'} • {item.status || 'inventory'}
@@ -235,22 +325,78 @@ export default function InventoryManager() {
                   <p>Sell: ${Number(item.expected_sale_price || 0).toFixed(2)}</p>
                   <p>Fees: ${Number(item.fees || 0).toFixed(2)}</p>
                   <p>Shipping: ${Number(item.shipping_cost || 0).toFixed(2)}</p>
-                  <p><strong>Profit: ${getProfit(item).toFixed(2)}</strong></p>
+                  <p>
+                    <strong>Profit: ${getProfit(item).toFixed(2)}</strong>
+                  </p>
 
-                  <button
-                    onClick={() => deleteItem(item.id)}
+                  <div
                     style={{
-                      marginTop: '12px',
-                      background: 'transparent',
-                      color: '#f5b84d',
-                      border: '1px solid rgba(245,184,77,0.35)',
-                      borderRadius: '10px',
-                      padding: '8px 12px',
-                      cursor: 'pointer'
+                      display: 'flex',
+                      gap: '10px',
+                      flexWrap: 'wrap',
+                      marginTop: '14px'
                     }}
                   >
-                    Delete
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => updateStatus(item.id, 'inventory')}
+                      style={{
+                        background: item.status === 'inventory' ? '#f5b84d' : 'transparent',
+                        color: item.status === 'inventory' ? '#07122b' : '#f5b84d',
+                        border: '1px solid rgba(245,184,77,0.35)',
+                        borderRadius: '10px',
+                        padding: '8px 12px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Inventory
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => updateStatus(item.id, 'listed')}
+                      style={{
+                        background: item.status === 'listed' ? '#f5b84d' : 'transparent',
+                        color: item.status === 'listed' ? '#07122b' : '#f5b84d',
+                        border: '1px solid rgba(245,184,77,0.35)',
+                        borderRadius: '10px',
+                        padding: '8px 12px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Listed
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => updateStatus(item.id, 'sold')}
+                      style={{
+                        background: item.status === 'sold' ? '#f5b84d' : 'transparent',
+                        color: item.status === 'sold' ? '#07122b' : '#f5b84d',
+                        border: '1px solid rgba(245,184,77,0.35)',
+                        borderRadius: '10px',
+                        padding: '8px 12px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Sold
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => deleteItem(item.id)}
+                      style={{
+                        background: 'transparent',
+                        color: '#f5b84d',
+                        border: '1px solid rgba(245,184,77,0.35)',
+                        borderRadius: '10px',
+                        padding: '8px 12px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
